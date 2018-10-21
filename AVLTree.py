@@ -85,8 +85,7 @@ class AVLTree:
             now_node.height = now_height
             now_node = now_node.parent
 
-    @staticmethod
-    def change(top_node: Node, low_node: Node):
+    def change(self, top_node: Node, low_node: Node):
         """Changes two nodes"""
 
         top_parent = top_node.parent
@@ -127,6 +126,8 @@ class AVLTree:
             low_right_son.parent = top_node
 
         top_node.height, low_node.height = low_node.height, top_node.height
+        if top_node is self.root:
+            self.root = low_node
 
     def delete(self, del_node: Node):
 
@@ -193,6 +194,9 @@ class AVLTree:
         elif a_parent is not None and not a_is_parent_left:
             a_parent.left_son = b
 
+        if b.parent is None:
+            self.root = b
+
         self.edit_height(a)
 
     def small_left_rotation(self, a: Node, b: Node):
@@ -215,6 +219,9 @@ class AVLTree:
             a_parent.right_son = b
         elif a_parent is not None and not a_is_parent_left:
             a_parent.left_son = b
+
+        if b.parent is None:
+            self.root = b
 
         self.edit_height(a)
 
@@ -249,6 +256,9 @@ class AVLTree:
             a_parent.right_son = c
         elif a_parent is not None and not a_is_parent_left:
             a_parent.left_son = c
+
+        if c.parent is None:
+            self.root = c
 
         self.edit_height(a)
         self.edit_height(b)
@@ -285,12 +295,16 @@ class AVLTree:
         elif a_parent is not None and not a_is_parent_left:
             a_parent.left_son = c
 
+        if c.parent is None:
+            self.root = c
+
         self.edit_height(a)
         self.edit_height(b)
 
     def node_balance(self, node: Node):
         now_node = node
         while now_node is not None:
+            next_node = now_node.parent
             a = now_node
             left_heigh = 0 if now_node.left_son is None else now_node.left_son.height
             right_height = 0 if now_node.right_son is None else now_node.right_son.height
@@ -312,5 +326,5 @@ class AVLTree:
                 else:
                     c = b.left_son
                     self.big_left_rotation(a, b, c)
-            else:
-                break
+
+            now_node = next_node
