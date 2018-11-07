@@ -1,64 +1,6 @@
-"""import sys
-
-
-node = [value, left_son, right_son, parent, is_parent_left]
-nodes = []
-n = int(sys.stdin.readline().strip())
-# sys.setrecursionlimit(n**2)
-for _ in range(n):
-    nodes.append([int(i) for i in sys.stdin.readline().strip().split()])
-for node in nodes:
-    node.append(None)
-    node.append(None)
-
-
-def left_subtree(index, node, max_val=-(2**31 + 1)):
-    global nodes
-    if nodes[index][3] is not None:
-        return nodes[index][3]
-    if node[1] == -1 and node[2] == -1:
-        return node[0]
-    if node[1] != -1:
-        max_val = max(max_val, left_subtree(node[1], nodes[node[1]], max_val))
-    if node[2] != -1:
-        max_val = max(max_val, left_subtree(node[2], nodes[node[2]], max_val))
-    nodes[index][3] = max_val
-    return max_val
-
-
-def right_subtree(index, node, min_val=(2**31 + 1)):
-    global nodes
-    if nodes[index][4] is not None:
-        return nodes[index][4]
-    if node[1] == -1 and node[2] == -1:
-        return node[0]
-    if node[1] != -1:
-        min_val = min(min_val, left_subtree(node[1], nodes[node[1]], min_val))
-    if node[2] != -1:
-        min_val = min(min_val, left_subtree(node[2], nodes[node[2]], min_val))
-    nodes[index][4] = min_val
-    return min_val
-
-
-result = 'CORRECT'
-for i in range(len(nodes)):
-    if len(nodes) == 0:
-        result = 'INCORRECT'
-        break
-    node = nodes[i]
-    if node[1] != -1:
-        left_val = left_subtree(i, node)
-        if left_val > node[0]:
-            result = 'INCORRECT'
-            break
-    if node[2] != -1:
-        right_val = right_subtree(i, node)
-        if node[0] > right_val:
-            result = 'INCORRECT'
-            break
-
-print(result)
 """
+ITERATIVE. FAILED TEST#2 ON STEPIC. WTF!?
+
 
 import sys
 
@@ -73,10 +15,10 @@ result = 'CORRECT'
 for i in range(n-1, -1, -1):
 
     now_node = nodes[i]
-    now_value = now_node[0]
+    now_value = nodes[i][0]
 
-    if (now_node[1] != -1 and now_node[3] > now_value) or \
-            (now_node[2] != -1 and now_value > now_node[4]):
+    if (nodes[i][1] != -1 and nodes[i][3] >= now_value) or \
+            (nodes[i][2] != -1 and now_value >= nodes[i][4]):
         result = 'INCORRECT'
         break
 
@@ -106,25 +48,80 @@ for i in range(n-1, -1, -1):
 print(result)
 
 """
+
+"""
+def in_order(nodes, now_node, previous_value=-(2**31 + 1), result=True):
+    if not result or previous_value >= now_node[0]:
+        return False
+    if now_node[1] != -1:
+        result = in_order(nodes, nodes[now_node[1]], previous_value, result)
+        previous_value = now_node[0]
+    if previous_value >= now_node[0]:
+        return False
+    previous_value = now_node[0]
+    if now_node[2] != -1:
+        result = in_order(nodes, nodes[now_node[2]], previous_value,result)
+    return result
+"""
+
+import sys
+
+
+def in_order(nodes, now_node, res: list):
+    if now_node[1] != -1:
+        in_order(nodes, nodes[now_node[1]], res)
+    res.append(now_node[0])
+    if now_node[2] != -1:
+        in_order(nodes, nodes[now_node[2]], res)
+    return res
+
+
+nodes = []
+n = int(sys.stdin.readline().strip())
+x = 300 if n < 5 else n**2
+sys.setrecursionlimit(x)
+res = []
+for _ in range(n):
+    nodes.append([int(i) for i in sys.stdin.readline().strip().split()] + [2**31 + 1, -(2**31 + 1)])
+
+if n > 0:
+    res = in_order(nodes, nodes[0], res)
+
+result = 'CORRECT'
+for i in range(n-1):
+    if i+1 > n:
+        break
+    if res[i] >= res[i+1]:
+        result = 'INCORRECT'
+        break
+
+print(result)
+
+
+
+
+"""
+3
+2 1 2
+1 -1 -1
+3 -1 -1
+CORRECT
+
+3
+1 1 2
+2 -1 -1
+3 -1 -1
+INCORRECT
+
+0
+CORRECT
+
 5
 1 -1 1
 2 -1 2
 3 -1 3
 4 -1 4
 5 -1 -1
-CORRECT
-
-4
-4 1 -1
-2 2 3
-1 -1 -1
-5 -1 -1
-INCORRECT
-
-3
-2 1 2
-1 -1 -1
-3 -1 -1
 CORRECT
 
 7
@@ -136,4 +133,25 @@ CORRECT
 5 -1 -1
 7 -1 -1
 CORRECT
+
+4
+4 1 -1
+2 2 3
+1 -1 -1
+5 -1 -1
+INCORRECT
+
+6
+2 1 2
+4 3 -1
+5 4 5
+3 -1 -1
+4 -1 -1
+8 -1 -1
+INCORRECT
+
+3
+2 1 2
+2 -1 -1
+2 -1 -1
 """
