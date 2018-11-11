@@ -18,15 +18,16 @@ class AVLTree:
     def __init__(self):
         self.root = None
         self.__nodes = []
+        self.other_root = None  # for split
 
     def find(self, value):
-        """Finds value in tree. Returns value or None."""
+        """Finds value in tree. Returns Node or None."""
 
         result = None
         now_node = self.root
         while now_node is not None:
             if now_node.value == value:
-                result = value
+                result = now_node
                 break
             elif value < now_node.value:
                 now_node = now_node.left_son
@@ -425,7 +426,7 @@ class AVLTree:
     def glue_tree_(self, other):
         """Glue tree (other) which contains bigger values to tree (self) which contains less values"""
 
-        # If self.height >= othre.height
+        # If self.height >= other.height
         if self.root.height >= other.root.height:
             v1 = self.find_right_subtree_for_merge(other.root.height)
             T = self.get_max_node(v1)
@@ -450,6 +451,16 @@ class AVLTree:
             other.merge_with_root(v1, v2, T, merge_to_left=False)
             return other
 
+    # TODO
+    def split(self, key):
+        now_node = self.root
+        if key > now_node.value:
+            now_node.left_son.parent = None
+
+
+
+
+
 if __name__ == '__main__':
     tree = AVLTree()
     tree.insert(AVLTree.Node(10))
@@ -470,6 +481,7 @@ if __name__ == '__main__':
     other.insert(AVLTree.Node(33))
 
     new_tree = tree.glue_tree_(other)
+    print(bool(tree.root))
     print(tree.find_by_index(4))
     print(tree.find_by_index(0))
     print(tree.find_by_index(10))
