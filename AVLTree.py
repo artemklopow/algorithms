@@ -9,7 +9,8 @@ class AVLTree:
             self.left_son = None
             self.right_son = None
             self.parent = None
-            self.is_parent_left = False
+            self.is_parent_left = False # Is parent left regarding node
+            self.size = 1
 
         def is_root(self, tree):
             return self is tree.root
@@ -71,6 +72,7 @@ class AVLTree:
             ins_node.is_parent_left = True
 
         self.edit_height(ins_node)
+        self.edit_size(ins_node)
         self.node_balance(ins_node)
 
     @staticmethod
@@ -85,6 +87,20 @@ class AVLTree:
             now_node.height = now_height
             now_node = now_node.parent
 
+    @staticmethod
+    def edit_size(node: Node):
+        """ Edits sizes from node to root"""
+        now_node = node
+        while now_node is not None:
+            ex_size = now_node.size
+            left_size = now_node.left_son.size if now_node.left_son is not None else 0
+            right_size = now_node.right_son.size if now_node.right_son is not None else 0
+            new_size = left_size + right_size + 1
+            if ex_size > 3 and ex_size == new_size:
+                break
+            now_node.size = new_size
+            now_node = now_node.parent
+
     def change(self, top_node: Node, low_node: Node):
         """Changes two nodes"""
 
@@ -92,16 +108,20 @@ class AVLTree:
         top_left_son = top_node.left_son
         top_right_son = top_node.right_son
         top_is_parent_left = top_node.is_parent_left
+        top_size = top_node.size
+
         low_parent = low_node.parent
         low_left_son = low_node.left_son
         low_right_son = low_node.right_son
         low_is_parent_left = low_node.is_parent_left
+        low_size = low_node.size
 
         # Low_node go up.
         low_node.parent = top_parent
         low_node.left_son = top_left_son
         low_node.right_son = top_right_son
         low_node.is_parent_left = top_is_parent_left
+        low_node.size = top_size
         if top_is_parent_left and top_parent is not None:
             top_parent.right_son = low_node
         elif not top_is_parent_left and top_parent is not None:
@@ -116,6 +136,7 @@ class AVLTree:
         top_node.left_son = low_left_son
         top_node.right_son = low_right_son
         top_node.is_parent_left = low_is_parent_left
+        top_node.size = low_size
         if low_is_parent_left and low_parent is not None:
             low_parent.right_son = top_node
         elif not low_is_parent_left and low_parent is not None:
@@ -170,6 +191,7 @@ class AVLTree:
                 parent_node.left_son = son_node
 
         self.edit_height(parent_node)
+        self.edit_size(parent_node)
         self.node_balance(parent_node)
         self.__nodes.remove(del_node)
 
@@ -198,6 +220,7 @@ class AVLTree:
             self.root = b
 
         self.edit_height(a)
+        self.edit_size(a)
 
     def small_left_rotation(self, a: Node, b: Node):
         a_parent = a.parent
@@ -224,6 +247,7 @@ class AVLTree:
             self.root = b
 
         self.edit_height(a)
+        self.edit_size(a)
 
     def big_right_rotation(self, a: Node, b: Node, c: Node):
         a_parent = a.parent
@@ -262,6 +286,8 @@ class AVLTree:
 
         self.edit_height(a)
         self.edit_height(b)
+        self.edit_size(a)
+        self.edit_size(b)
 
     def big_left_rotation(self, a:Node, b: Node, c: Node):
         a_parent = a.parent
@@ -300,6 +326,8 @@ class AVLTree:
 
         self.edit_height(a)
         self.edit_height(b)
+        self.edit_size(a)
+        self.edit_size(b)
 
     def node_balance(self, node: Node):
         now_node = node
@@ -328,3 +356,48 @@ class AVLTree:
                     self.big_left_rotation(a, b, c)
 
             now_node = next_node
+
+    def find_by_index(self, index):
+        """Finds value by index. Retuns value or None (if something goes wrong). INDEXES STARTS FROM 1"""
+        now_node = self.root
+        now_index = index
+        while now_node is not None:
+            left_size = now_node.left_son.size if now_node.left_son is not None else 0
+            if now_index == left_size + 1:
+                return now_node.value
+            elif now_index < left_size + 1:
+                now_node = now_node.left_son
+            else:
+                now_index = now_index - left_size - 1
+                now_node = now_node.right_son
+        return None  # Just in case.
+
+
+    #def glue_tree(self, other: AVLTree):
+        """Glue tree (other) which contains bigger values to tree (self) which contains less values"""
+    #    pass
+
+
+if __name__ == '__main__':
+    tree = AVLTree()
+    tree.insert(AVLTree.Node(10))
+    tree.insert(AVLTree.Node(8))
+    tree.insert(AVLTree.Node(3))
+    tree.insert(AVLTree.Node(4))
+    tree.insert(AVLTree.Node(5))
+    tree.insert(AVLTree.Node(9))
+    tree.insert(AVLTree.Node(6))
+    tree.insert(AVLTree.Node(1))
+    tree.insert(AVLTree.Node(2))
+    tree.insert(AVLTree.Node(7))
+
+    other = AVLTree()
+    other.insert(AVLTree.Node(21))
+    other.insert(AVLTree.Node(20))
+    other.insert(AVLTree.Node(35))
+    other.insert(AVLTree.Node(33))
+
+    print(tree.find_by_index(4))
+    print(tree.find_by_index(0))
+    print(tree.find_by_index(10))
+    print(tree.find_by_index(1))
