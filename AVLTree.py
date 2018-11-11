@@ -372,11 +372,83 @@ class AVLTree:
                 now_node = now_node.right_son
         return None  # Just in case.
 
+    def get_max_node(self, node):
+        """Returns max value node"""
+        now_node = node
+        while now_node.right_son is not None:
+            now_node = now_node.right_son
+        return now_node
 
-    #def glue_tree(self, other: AVLTree):
+    def find_right_subtree_for_merge(self, height):
+        """Finds right subtree which equal height"""
+        subtree_root = self.root
+        while subtree_root.height - height > 1:
+            subtree_root = subtree_root.right_son
+        return subtree_root
+
+    def find_left_subtree_for_merge(self, height):
+        """Finds right subtree which equal height"""
+        subtree_root = self.root
+        while subtree_root.height - height > 1:
+            subtree_root = subtree_root.left_son
+        return subtree_root
+
+    def merge_with_root(self, v1: Node, v2: Node, T: Node, merge_to_left: bool):
+        """Just change references"""
+        v1_parent = v1.parent
+        v1_is_parent_left = v1.is_parent_left
+
+        if v1_is_parent_left:
+            v1_parent.right_son = T
+        else:
+            v1_parent.left_son = T
+
+        T.parent = v1_parent
+        T.is_parent_left = v1_is_parent_left
+        v1.parent = T
+        v2.parent = T
+        if merge_to_left:
+            T.left_son = v1
+            T.right_son = v2
+            v1.is_parent_left = False
+            v2.is_parent_left = True
+        else:
+            T.left_son = v2
+            T.right_son = v1
+            v1.is_parent_left = True
+            v2.is_parent_left = False
+
+        self.edit_height(T)
+        self.edit_size(T)
+        self.node_balance(T)
+
+    def glue_tree_(self, other):
         """Glue tree (other) which contains bigger values to tree (self) which contains less values"""
-    #    pass
 
+        # If self.height >= othre.height
+        if self.root.height >= other.root.height:
+            v1 = self.find_right_subtree_for_merge(other.root.height)
+            T = self.get_max_node(v1)
+            self.delete(T)
+            self.__nodes.append(T)
+            v2 = other.root
+            for node in other.__nodes:
+                self.__nodes.append(node)
+                other.__nodes = []
+            self.merge_with_root(v1, v2, T, merge_to_left=True)
+            return self
+
+        else:
+            v1 = other.find_left_subtree_for_merge(self.root.height)
+            T = other.get_max_node(v1)
+            other.delete(T)
+            other.__nodes.append(T)
+            v2 = self.root
+            for node in self.__nodes:
+                other.__nodes.append(node)
+                self.nodes = []
+            other.merge_with_root(v1, v2, T, merge_to_left=False)
+            return other
 
 if __name__ == '__main__':
     tree = AVLTree()
@@ -397,6 +469,7 @@ if __name__ == '__main__':
     other.insert(AVLTree.Node(35))
     other.insert(AVLTree.Node(33))
 
+    new_tree = tree.glue_tree_(other)
     print(tree.find_by_index(4))
     print(tree.find_by_index(0))
     print(tree.find_by_index(10))
