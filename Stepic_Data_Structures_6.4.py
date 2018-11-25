@@ -1,3 +1,6 @@
+import sys
+import doctest
+
 class AVLTree:
 
     class Node:
@@ -642,37 +645,71 @@ class AVLTree:
         return small_root, big_root
 
 
-if __name__ == '__main__':
+def read():
+    n = int(sys.stdin.readline())
+    read = ['' for _ in range(n)]
+    for i in range(n):
+        read[i] = sys.stdin.readline().strip()
+    return read
+
+
+def fnc(i, s=0):
+    return (i + s) % 1_000_000_001
+
+def stpk(read):
+    """
+    >>> stpk(['? 1', '+ 1', '? 1', '+ 2', 's 1 2', '+ 1000000000', '? 1000000000', '- 1000000000', '? 1000000000', 's 999999999 1000000000', '- 2', '? 2', '- 0', '+ 9', 's 0 9'])
+    ['Not found', 'Found', '3', 'Found', 'Not found', '1', 'Not found', '10']
+    >>> stpk(['5', '? 0', '+ 0', '? 0', '- 0', '? 0'])
+    ['Not found', 'Found', 'Not found']
+    >>> stpk(['5', '+ 491572259', '? 491572259', '? 899375874', 's 310971296 877523306', '+ 352411209'])
+    ['Found', 'Not found', '491572259']
+    """
+    s = 0
+    root = None
     tree = AVLTree()
-    root_1 = tree.insert(AVLTree.Node(10))
-    root_1 = tree.insert(AVLTree.Node(8), root_1)
-    root_1 = tree.insert(AVLTree.Node(3), root_1)
-    root_1 = tree.insert(AVLTree.Node(4), root_1)
-    root_1 = tree.insert(AVLTree.Node(5), root_1)
-    """
-    root_1 = tree.insert(AVLTree.Node(9), root_1)
-    root_1 = tree.insert(AVLTree.Node(6), root_1)
-    root_1 = tree.insert(AVLTree.Node(1), root_1)
-    root_1 = tree.insert(AVLTree.Node(2), root_1)
-    root_1 = tree.insert(AVLTree.Node(7), root_1)
-    """
-    print(tree.roots)
+    result = []
+    for line in read:
+        data = line.split()
+        if data[0] == '+':
+            i = fnc(int(data[1]), s)
+            root = tree.insert(AVLTree.Node(i), root)
+        elif data[0] == '-':
+            if root is None:
+                continue
+            i = fnc(int(data[1]), s)
+            node = tree.find(i, root)
+            if node:
+                root = tree.delete(node, root)
+        elif data[0] == '?':
+            i = fnc(int(data[1]), s)
+            if root is None or not(tree.find(i, root)):
+                result.append('Not found')
+            else:
+                result.append('Found')
+
+        elif data[0] == 's':
+            l = fnc(int(data[1]), s)
+            r = fnc(int(data[2]), s)
+            if root is None:
+                s = 0
+            else:
+                root_1, root_2 = tree.split(l-1, root)
+                root_2, root_3 = tree.split(r, root_2)
+                if root_2 is not None:
+                    s = root_2.sum
+                else:
+                    s = 0
+                root = tree.glue_tree_(root_1, root_2)
+                root = tree.glue_tree_(root, root_3)
+            result.append(str(s))
+
+    return result
 
 
-    root_2 = tree.insert(AVLTree.Node(21))
-    root_2 = tree.insert(AVLTree.Node(20), root_2)
-    root_2 = tree.insert(AVLTree.Node(35), root_2)
-    root_2 = tree.insert(AVLTree.Node(33), root_2)
-    root_2 = tree.insert(AVLTree.Node(40), root_2)
-    root_2 = tree.insert(AVLTree.Node(50), root_2)
-    root_2 = tree.insert(AVLTree.Node(60), root_2)
-    root_2 = tree.insert(AVLTree.Node(55), root_2)
-    print(tree.roots)
-
-    new_root = tree.glue_tree_(root_1, root_2)
-    tree.split(20, new_root)
-    print(*tree.roots)
-    print(tree.find_by_index(4, new_root))
-    print(tree.find_by_index(0, new_root))
-    print(tree.find_by_index(10, new_root))
-    print(tree.find_by_index(1, new_root))
+if __name__ == '__main__':
+    doctest.testmod()
+    read = read()
+    result = stpk(read)
+    out = '\n'.join(result)
+    print(out)
