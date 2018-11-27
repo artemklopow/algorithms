@@ -8,10 +8,16 @@ class Node:
         self.right_son = None
         self.sum = value
 
-    def left_zigzig(self, u, a, b, A, B, C, D):
+    @staticmethod
+    def left_zigzig(u, a, b, A, B, C, D):
 
         main_parent = b.parent
         main_is_parent_left = b.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -43,10 +49,16 @@ class Node:
         a.sum = B_sum + b.sum + a.value
         u.sum = A_sum + a.sum + u.value
 
-    def right_zigzig(self, u, a, b, A, B, C, D):
+    @staticmethod
+    def right_zigzig(u, a, b, A, B, C, D):
 
         main_parent = b.parent
         main_is_parent_left = b.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -78,10 +90,16 @@ class Node:
         a.sum = B_sum + b.sum + a.value
         u.sum = A_sum + a.sum + u.value
 
-    def left_zigzag(self, u, a, b, A, B, C, D):
+    @staticmethod
+    def left_zigzag(u, a, b, A, B, C, D):
 
         main_parent = a.parent
         main_is_parent_left = a.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -113,10 +131,16 @@ class Node:
         a.sum = A_sum + B_sum + a.value
         u.sum = a.sum + b.sum + u.value
 
-    def right_zigzag(self, u, a, b, A, B, C, D):
+    @staticmethod
+    def right_zigzag(u, a, b, A, B, C, D):
 
         main_parent = a.parent
         main_is_parent_left = a.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -148,10 +172,16 @@ class Node:
         a.sum = A_sum + B_sum + a.value
         u.sum = a.sum + b.sum + u.value
 
-    def left_zig(self, u, a, A, B, C):
+    @staticmethod
+    def left_zig(u, a, A, B, C):
 
         main_parent = a.parent
         main_is_parent_left = a.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -172,10 +202,16 @@ class Node:
         a.sum = B_sum + C_sum + a.value
         u.sum = a.sum + A_sum + u.value
 
-    def right_zig(self, u, a, A, B, C):
+    @staticmethod
+    def right_zig(u, a, A, B, C):
 
         main_parent = a.parent
         main_is_parent_left = a.is_parent_left
+
+        if main_parent is not None and not main_is_parent_left:
+            main_parent.left_son = u
+        elif main_parent is not None and main_is_parent_left:
+            main_parent.right_son = u
 
         u.parent = main_parent
         u.is_parent_left = main_is_parent_left
@@ -312,11 +348,12 @@ class Node:
 
         if indicator == 'r':
             small_root = root
+            big_root = root.right_son
+
             small_root.right_son = None
             left_sum = small_root.left_son.sum if small_root.left_son is not None else 0
             small_root.sum = left_sum + small_root.value
 
-            big_root = root.right_son
             if big_root is not None:
                 big_root.parent = None
 
@@ -390,7 +427,7 @@ class Node:
         root.left_son = None
         root.right_son = None
 
-        root = self.merge(root.left_son, root.right_son)
+        root = self.merge(left_root, right_root)
         return root
 
     def search(self, key):
